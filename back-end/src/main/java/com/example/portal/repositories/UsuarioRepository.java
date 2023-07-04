@@ -11,7 +11,7 @@ import com.example.portal.models.Usuario;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 	
-	Optional<Usuario> findByEmail(String email);
+	Optional<Usuario> findByUsername(String email);
 	
 	@Transactional
 	@Modifying

@@ -21,9 +21,7 @@ public class Usuario {
 	private Double saldo;
 	
 	@Column(unique = true)
-	private String email;
-	
-	private  String senha;
+	private String username;
 	@JsonIgnore
 	@OneToMany (mappedBy="usuario")
 	private List<Transacao>  transacao = new ArrayList<>();
@@ -32,12 +30,11 @@ public class Usuario {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Usuario(Integer id, String nome, Double saldo, String email, String senha, List<Transacao> transacao) {
+	public Usuario(Integer id, String nome, Double saldo, String username, List<Transacao> transacao) {
 		this.id = id;
 		this.nome = nome;
 		this.saldo = saldo;
-		this.email = email;
-		this.senha = senha;
+		this.username = username;
 		this.transacao = transacao;
 	}
 
@@ -64,15 +61,7 @@ public class Usuario {
 	public void setSaldo(Double saldo) {
 		this.saldo = saldo;
 	}
-
-	public String getSenha() {
-		return senha;
-	}
-
-	public void setSenha(String senha) {
-		this.senha = senha;
-	}
-
+	
 	public List<Transacao> getTransacao() {
 		return transacao;
 	}
@@ -81,12 +70,12 @@ public class Usuario {
 		this.transacao = transacao;
 	}
 
-	public String getEmail() {
-		return email;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setEmail(String email) {
-		this.email = email;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 	
 }
