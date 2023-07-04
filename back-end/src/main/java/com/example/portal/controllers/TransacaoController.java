@@ -4,6 +4,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,9 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.example.portal.models.Transacao;
-import com.example.portal.models.enums.TipoTransacao;
+import com.example.portal.models.dtos.TransacaoDTO;
 import com.example.portal.repositories.TransacaoRepository;
-import com.example.portal.repositories.UsuarioRepository;
+import com.example.portal.services.TransacaoService;
 
 @RestController
 @RequestMapping("transacoes")
@@ -34,18 +35,23 @@ public class TransacaoController {
 
 	@Autowired
 	private TransacaoRepository repository;
+	
 	@Autowired
-	private UsuarioRepository usuRepository;
+	private TransacaoService service;
+	
+	@Autowired
+	private ModelMapper modelMapper;
 
 	@PostMapping
-	public ResponseEntity<?> create(@RequestBody Transacao transacao) {
+	public ResponseEntity<?> create(@RequestBody TransacaoDTO transacao) {
 
 		transacao.setData(LocalDateTime.now());
-		processarTransacao(transacao);
-		Transacao newtr = repository.save(transacao);
+		Transacao transacaoFormart = modelMapper.map(transacao, Transacao.class);
+		service.processarTransacao(transacaoFormart);
+		Transacao newtr = repository.save(transacaoFormart);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newtr.getId())
 				.toUri();
-		return ResponseEntity.created(location).body(newtr);
+		return ResponseEntity.created(location).body(modelMapper.map(newtr, TransacaoDTO.class));
 	}
 
 	@PutMapping
@@ -60,24 +66,17 @@ public class TransacaoController {
 
 			if (transacao.getValor() != null) {
 				
+				service.atualizarTransacao(
+						trbefore.get().getUsuario().getId(),
+						trbefore.get().getTipo(),
+						trbefore.get().getValor(),
+						transacao.getValor()
+				);
 				trbefore.get().setValor(transacao.getValor());
-				
-				if(trbefore.get().getTipo().equals(TipoTransacao.ENTRADA)) {
-					Optional<Double> saldo = usuRepository.findSaldoById(trbefore.get().getUsuario().getId());
-					Double novoSaldo = (saldo.get() + (transacao.getValor() - trbefore.get().getValor()));
-					System.out.println("novoSaldo: "+ (transacao.getValor() + trbefore.get().getValor()));
-					usuRepository.updateSaldoById(novoSaldo, trbefore.get().getUsuario().getId());
-					
-				}else if(trbefore.get().getTipo().equals(TipoTransacao.SAIDA)) {
-					Optional<Double> saldo = usuRepository.findSaldoById(trbefore.get().getUsuario().getId());
-					Double novoSaldo = (saldo.get() + (trbefore.get().getValor() - transacao.getValor()));
-					System.out.println("novoSaldo: "+ (trbefore.get().getValor() + transacao.getValor()));
-					usuRepository.updateSaldoById(novoSaldo, trbefore.get().getUsuario().getId());
-				}
 			}
 			
 			Transacao newtr = repository.save(trbefore.get());
-			return ResponseEntity.ok(newtr);
+			return ResponseEntity.ok(modelMapper.map(newtr, TransacaoDTO.class));
 
 		} else {
 			return ResponseEntity.notFound().build();
@@ -89,7 +88,7 @@ public class TransacaoController {
 		Optional<Transacao> transacao = repository.findById(id);
 
 		if (transacao != null) {
-			removerTransacao(transacao.get());
+			service.removerTransacao(transacao.get());
 			repository.deleteById(id);
 			return ResponseEntity.status(204).build();
 		} else {
@@ -98,14 +97,18 @@ public class TransacaoController {
 	}
 
 	@GetMapping
-	public ResponseEntity<Page<Transacao>> findAll(@RequestParam(required = true) Integer usuid,
+	public ResponseEntity<Page<?>> findAll(@RequestParam(required = true) Integer usuid,
 			@RequestParam(required = false) LocalDateTime dataini,
 			@RequestParam(required = false) LocalDateTime datafim,
 			@PageableDefault(size = 4, sort = "data", direction = Direction.DESC) Pageable pageable) {
-		if (dataini != null && datafim != null)
-			return ResponseEntity.ok(repository.findAllByUsuarioIdAndDataBetween(usuid, dataini, datafim, pageable));
-
-		return ResponseEntity.ok(repository.findAllByUsuarioId(usuid, pageable));
+		
+		if (dataini != null && datafim != null) {
+			Page<Transacao> transacaoPage = repository.findAllByUsuarioIdAndDataBetween(usuid, dataini, datafim, pageable);
+			return ResponseEntity.ok(transacaoPage.map(transacao -> modelMapper.map(transacao, TransacaoDTO.class)));
+		}
+		
+		Page<Transacao> transacaoPage = repository.findAllByUsuarioId(usuid, pageable);
+		return ResponseEntity.ok(transacaoPage.map(transacao -> modelMapper.map(transacao, TransacaoDTO.class)));
 	}
 
 	@GetMapping("/{id}")
@@ -113,34 +116,9 @@ public class TransacaoController {
 		Optional<Transacao> tr = repository.findById(id);
 
 		if (tr != null) {
-			return ResponseEntity.ok(tr);
+			return ResponseEntity.ok(modelMapper.map(tr, TransacaoDTO.class));
 		} else {
 			return ResponseEntity.notFound().build();
 		}
 	}
-
-	private void processarTransacao(Transacao transacao) {
-		Optional<Double> saldo = usuRepository.findSaldoById(transacao.getUsuario().getId());
-		if (transacao.getTipo() == TipoTransacao.SAIDA) {
-			Double novoSaldo = saldo.get() - transacao.getValor();
-			usuRepository.updateSaldoById(novoSaldo, transacao.getUsuario().getId());
-
-		} else if (transacao.getTipo() == TipoTransacao.ENTRADA) {
-			Double novoSaldo = saldo.get() + transacao.getValor();
-			usuRepository.updateSaldoById(novoSaldo, transacao.getUsuario().getId());
-		}
-	}
-
-	private void removerTransacao(Transacao transacao) {
-		Optional<Double> saldo = usuRepository.findSaldoById(transacao.getUsuario().getId());
-		if (transacao.getTipo() == TipoTransacao.SAIDA) {
-			Double novoSaldo = saldo.get() + transacao.getValor();
-			usuRepository.updateSaldoById(novoSaldo, transacao.getUsuario().getId());
-
-		} else if (transacao.getTipo() == TipoTransacao.ENTRADA) {
-			Double novoSaldo = saldo.get() - transacao.getValor();
-			usuRepository.updateSaldoById(novoSaldo, transacao.getUsuario().getId());
-		}
-	}
-
 }
