@@ -54,14 +54,17 @@ public class TransacaoController {
 	}
 
 	@PutMapping
-	public ResponseEntity<?> update(@RequestBody Transacao transacao) {
+	public ResponseEntity<?> update(@RequestBody TransacaoDTO transacao) {
 
 		Optional<Transacao> trbefore = repository.findById(transacao.getId());
+		int att = 0;
 
-		if (trbefore != null ) {
+		if (trbefore.isPresent()) {
 
-			if (transacao.getDescricao() != null)
+			if (transacao.getDescricao() != null) {
 				trbefore.get().setDescricao(transacao.getDescricao());
+				att++;
+			}
 
 			if (transacao.getValor() != null) {
 				
@@ -72,10 +75,15 @@ public class TransacaoController {
 						transacao.getValor()
 				);
 				trbefore.get().setValor(transacao.getValor());
+				att++;
 			}
 			
-			Transacao newtr = repository.save(trbefore.get());
-			return ResponseEntity.ok(modelMapper.map(newtr, TransacaoDTO.class));
+			if(att == 0)
+				return ResponseEntity.ok("Nada foi atualizado!");
+			else {
+				Transacao newtr = repository.save(trbefore.get());
+				return ResponseEntity.ok(modelMapper.map(newtr, TransacaoDTO.class));
+			}
 
 		} else {
 			return ResponseEntity.notFound().build();
@@ -86,7 +94,7 @@ public class TransacaoController {
 	public ResponseEntity<?> delete(@PathVariable Integer id) {
 		Optional<Transacao> transacao = repository.findById(id);
 
-		if (transacao != null) {
+		if (transacao.isPresent()) {
 			service.removerTransacao(transacao.get());
 			repository.deleteById(id);
 			return ResponseEntity.status(204).build();
@@ -115,8 +123,8 @@ public class TransacaoController {
 	public ResponseEntity<?> findById(@PathVariable Integer id) {
 		Optional<Transacao> tr = repository.findById(id);
 
-		if (tr != null) {
-			return ResponseEntity.ok(modelMapper.map(tr, TransacaoDTO.class));
+		if (tr.isPresent()) {
+			return ResponseEntity.ok(modelMapper.map(tr.get(), TransacaoDTO.class));
 		} else {
 			return ResponseEntity.notFound().build();
 		}

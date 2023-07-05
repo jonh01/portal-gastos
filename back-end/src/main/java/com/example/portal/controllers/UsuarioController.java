@@ -32,23 +32,24 @@ public class UsuarioController {
 		
 		Optional<Usuario> usuExist = repository.findByUsername(usu.getUsername());
 		
-		if(usuExist == null) {
-			Usuario newUsu = repository.save(usu);
-			URI location = ServletUriComponentsBuilder.
-					fromCurrentRequest().
-					path("/{id}").
-					buildAndExpand(newUsu.getId()).
-					toUri();
-			return ResponseEntity.created(location).body(newUsu);
+		if(usuExist.isPresent()) {
+			return ResponseEntity.badRequest().body("Username já cadastrado!");
 		}
-		return ResponseEntity.badRequest().body("Email já cadastrado!");
+		Usuario newUsu = repository.save(usu);
+		URI location = ServletUriComponentsBuilder.
+				fromCurrentRequest().
+				path("/{id}").
+				buildAndExpand(newUsu.getId()).
+				toUri();
+		return ResponseEntity.created(location).body(newUsu);
+		
 	}
 	
 	@DeleteMapping ("/{id}")
 	public ResponseEntity<?> delete (@PathVariable Integer id) {
 		Optional<Usuario> usu = repository.findById(id);
 		
-		if(usu != null) {
+		if(usu.isPresent()) {
 			repository.deleteById(id);
 			return ResponseEntity.status(204).build();
 		}
@@ -58,15 +59,19 @@ public class UsuarioController {
 	}
 	
 	@GetMapping
-	public ResponseEntity<?> findByUsername(@RequestParam String username){
+	public ResponseEntity<?> findByUsername(@RequestParam (required = false) String username){
+		
+		if(username == null)
+			return ResponseEntity.ok(repository.findAll());
+	
 		Optional<Usuario> usu = repository.findByUsername(username);
-		return usu != null? ResponseEntity.ok(usu): ResponseEntity.notFound().build();
+		return usu.isPresent()? ResponseEntity.ok(usu): ResponseEntity.notFound().build();
 	}
 	
 	@GetMapping("/{id}/saldo")
 	public ResponseEntity<?> findSaldoByUsuarioId(@PathVariable Integer id){
 		Optional<Double> saldo = repository.findSaldoById(id);
-		return saldo != null? ResponseEntity.ok(saldo): ResponseEntity.notFound().build();
+		return saldo.isPresent()? ResponseEntity.ok(saldo): ResponseEntity.notFound().build();
 	}
 	
 }
