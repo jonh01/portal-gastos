@@ -1,15 +1,14 @@
 package com.example.portal.controllers;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -97,18 +96,19 @@ public class TransacaoController {
 	}
 
 	@GetMapping
-	public ResponseEntity<Page<?>> findAll(@RequestParam(required = true) Integer usuid,
-			@RequestParam(required = false) LocalDateTime dataini,
-			@RequestParam(required = false) LocalDateTime datafim,
-			@PageableDefault(size = 4, sort = "data", direction = Direction.DESC) Pageable pageable) {
+	public ResponseEntity<?> findAll(@RequestParam(required = true) Integer usuid,
+			@RequestParam(required = false) LocalDate dataini,
+			@RequestParam(required = false) LocalDate datafim) {
 		
 		if (dataini != null && datafim != null) {
-			Page<Transacao> transacaoPage = repository.findAllByUsuarioIdAndDataBetween(usuid, dataini, datafim, pageable);
-			return ResponseEntity.ok(transacaoPage.map(transacao -> modelMapper.map(transacao, TransacaoDTO.class)));
+			 LocalDateTime datainiTime = dataini.atTime(00, 00);
+			 LocalDateTime datafimTime = datafim.atTime(00, 00);
+			Map<LocalDate, List<TransacaoDTO>> transacoesPorDia = service.BuscarTransacaoUsuPorDiaFiltrada(usuid, datainiTime, datafimTime);
+			return ResponseEntity.ok(transacoesPorDia);
 		}
 		
-		Page<Transacao> transacaoPage = repository.findAllByUsuarioId(usuid, pageable);
-		return ResponseEntity.ok(transacaoPage.map(transacao -> modelMapper.map(transacao, TransacaoDTO.class)));
+		Map<LocalDate, List<TransacaoDTO>> transacoesPorDia = service.BuscarTransacaoUsuPorDia(usuid);
+		return ResponseEntity.ok(transacoesPorDia);
 	}
 
 	@GetMapping("/{id}")

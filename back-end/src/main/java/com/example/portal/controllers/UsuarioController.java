@@ -60,7 +60,13 @@ public class UsuarioController {
 	@GetMapping
 	public ResponseEntity<?> findByUsername(@RequestParam String username){
 		Optional<Usuario> usu = repository.findByUsername(username);
-		return usu.isPresent()? ResponseEntity.ok(usu): ResponseEntity.notFound().build();
+		return usu != null? ResponseEntity.ok(usu): ResponseEntity.notFound().build();
+	}
+	
+	@GetMapping("/{id}/saldo")
+	public ResponseEntity<?> findSaldoByUsuarioId(@PathVariable Integer id){
+		Optional<Double> saldo = repository.findSaldoById(id);
+		return saldo != null? ResponseEntity.ok(saldo): ResponseEntity.notFound().build();
 	}
 	
 }

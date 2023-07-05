@@ -22,6 +22,7 @@ public class Usuario {
 	
 	@Column(unique = true)
 	private String username;
+	
 	@JsonIgnore
 	@OneToMany (mappedBy="usuario")
 	private List<Transacao>  transacao = new ArrayList<>();
