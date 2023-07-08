@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +20,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.example.portal.models.Usuario;
 import com.example.portal.models.dtos.UsuarioDTO;
 import com.example.portal.repositories.UsuarioRepository;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("usuarios")
@@ -72,7 +75,7 @@ public class UsuarioController {
 	}
 	
 	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody UsuarioDTO usuLogin ){
+	public ResponseEntity<?> login(@Valid @RequestBody UsuarioDTO usuLogin ){
 		
 		Optional<Usuario> usu = repository.findByEmail(usuLogin.getEmail());
 		
@@ -82,6 +85,23 @@ public class UsuarioController {
 		}
 		else {
 			return ResponseEntity.badRequest().body("Email ou senha inválido(a)!");
+		}
+	
+	}
+	
+	@PutMapping("/senha")
+	public ResponseEntity<?> updateSenha(@Valid @RequestBody UsuarioDTO usuLogin ){
+		
+		Optional<Usuario> usu = repository.findByEmail(usuLogin.getEmail());
+		
+		if(usu.isPresent()) {
+			usu.get().setSenha(usuLogin.getSenha());
+			Usuario usuAtt = repository.save(usu.get());
+			
+			return ResponseEntity.ok(usuAtt);
+		}
+		else {
+			return ResponseEntity.notFound().build();
 		}
 	
 	}
