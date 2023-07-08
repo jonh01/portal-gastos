@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.example.portal.models.Usuario;
+import com.example.portal.models.dtos.UsuarioDTO;
 import com.example.portal.repositories.UsuarioRepository;
 
 @RestController
@@ -30,10 +31,10 @@ public class UsuarioController {
 	@PostMapping
 	public ResponseEntity<?> create(@RequestBody Usuario usu) {
 		
-		Optional<Usuario> usuExist = repository.findByUsername(usu.getUsername());
+		Optional<Usuario> usuExist = repository.findByEmail(usu.getEmail());
 		
 		if(usuExist.isPresent()) {
-			return ResponseEntity.badRequest().body("Username já cadastrado!");
+			return ResponseEntity.badRequest().body("Email já cadastrado!");
 		}
 		Usuario newUsu = repository.save(usu);
 		URI location = ServletUriComponentsBuilder.
@@ -59,12 +60,8 @@ public class UsuarioController {
 	}
 	
 	@GetMapping
-	public ResponseEntity<?> findByUsername(@RequestParam (required = false) String username){
-		
-		if(username == null)
-			return ResponseEntity.ok(repository.findAll());
-	
-		Optional<Usuario> usu = repository.findByUsername(username);
+	public ResponseEntity<?> findByEmail(@RequestParam String email){
+		Optional<Usuario> usu = repository.findByEmail(email);
 		return usu.isPresent()? ResponseEntity.ok(usu): ResponseEntity.notFound().build();
 	}
 	
@@ -72,6 +69,21 @@ public class UsuarioController {
 	public ResponseEntity<?> findSaldoByUsuarioId(@PathVariable Integer id){
 		Optional<Double> saldo = repository.findSaldoById(id);
 		return saldo.isPresent()? ResponseEntity.ok(saldo): ResponseEntity.notFound().build();
+	}
+	
+	@PostMapping("/login")
+	public ResponseEntity<?> login(@RequestBody UsuarioDTO usuLogin ){
+		
+		Optional<Usuario> usu = repository.findByEmail(usuLogin.getEmail());
+		
+		if(usu.isPresent()) {
+			
+			return usu.get().getSenha().equals(usuLogin.getSenha())? ResponseEntity.ok(usu): ResponseEntity.badRequest().body("Email ou senha inválido(a)!");
+		}
+		else {
+			return ResponseEntity.badRequest().body("Email ou senha inválido(a)!");
+		}
+	
 	}
 	
 }
