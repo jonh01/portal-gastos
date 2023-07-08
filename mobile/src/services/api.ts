@@ -1,8 +1,9 @@
+import { TipoTransacao } from '../@types/enums';
 import { Transacao, TransacaoUpdate } from '../@types/transacao';
 import { Usuario, UsuarioLogin } from './../@types/usuario';
 import axios from "axios";
 
-const axiosInstance = axios.create({ baseURL: 'http://localhost:8080/'});
+const axiosInstance = axios.create({ baseURL: 'http://10.0.2.2:8080/'});
 
 // Usuario
 
@@ -62,10 +63,32 @@ export const deleteTransacao = async (id:number) => {
     return response;
 };
 
-export const findAll = async (usuId:number, dataini:string|null, datafim?:string|null) => {
+export const findAll = async (usuId:number, tipo?: TipoTransacao|null, dataini?:string|null, datafim?:string|null) => {
 
-    const requestParam = dataini || datafim == null? `transacoes?usuid=${usuId}`: `transacoes?usuid=${usuId}&dataini=${dataini}&datafim=${datafim}`;
+    let requestParam = '';
+    if(dataini || datafim == null){
+        requestParam = tipo == null? `transacoes?usuid=${usuId}`: `transacoes?usuid=${usuId}&tipo=${tipo}`;
+    }
+    else{
+        requestParam = tipo == null? 
+        `transacoes?usuid=${usuId}&dataini=${dataini}&datafim=${datafim}`:
+        `transacoes?usuid=${usuId}&tipo=${tipo}&dataini=${dataini}&datafim=${datafim}`;
+    }
+    const response = await axiosInstance.get(requestParam);
+    return response;
+};
 
+export const somaSaldoMes = async (usuId:number, tipo: TipoTransacao) => {
+
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()+1).padStart(2, '0');
+
+    const dataini = `${year}-${month}-01`;
+    const datafim = `${year}-${month}-${day}`;
+
+    const requestParam = `transacoes/soma?usuid=${usuId}&tipo=${tipo}&dataini=${dataini}&datafim=${datafim}`;
     const response = await axiosInstance.get(requestParam);
     return response;
 };

@@ -89,6 +89,26 @@ public class TransacaoService {
 	    return transacoesPorDia;
 	}
 	
+	
+	public Map<LocalDate, List<TransacaoDTO>> BuscarTransacaoUsuPorDia(Integer usuarioId, TipoTransacao tipo) {
+		
+	    Map<LocalDate, List<TransacaoDTO>> transacoesPorDia = new HashMap<>();
+
+	    List<Transacao> transacoesDoUsuario = trRepository.findAllByUsuarioIdAndTipoOrderByDataDesc(usuarioId, tipo);
+
+	    for (Transacao transacao : transacoesDoUsuario) {
+	        LocalDate data = transacao.getData().toLocalDate(); // Extrai a parte de data do LocalDateTime
+
+	        if (!transacoesPorDia.containsKey(data)) {
+	            transacoesPorDia.put(data, new ArrayList<>());
+	        }
+
+	        transacoesPorDia.get(data).add(modelMapper.map(transacao, TransacaoDTO.class));
+	    }
+
+	    return transacoesPorDia;
+	}
+	
 	public Map<LocalDate, List<TransacaoDTO>> BuscarTransacaoUsuPorDiaFiltrada(Integer usuarioId, LocalDateTime dataini, LocalDateTime datafim) {
 		
 	    Map<LocalDate, List<TransacaoDTO>> transacoesPorDia = new HashMap<>();
@@ -106,6 +126,31 @@ public class TransacaoService {
 	    }
 
 	    return transacoesPorDia;
+	}
+	
+	public Map<LocalDate, List<TransacaoDTO>> BuscarTransacaoUsuPorDiaFiltrada(Integer usuarioId, TipoTransacao tipo, LocalDateTime dataini, LocalDateTime datafim) {
+		
+	    Map<LocalDate, List<TransacaoDTO>> transacoesPorDia = new HashMap<>();
+
+	    List<Transacao> transacoesDoUsuario = trRepository.findAllByUsuarioIdAndTipoAndDataBetweenOrderByDataDesc(usuarioId, tipo, dataini, datafim  );
+
+	    for (Transacao transacao : transacoesDoUsuario) {
+	        LocalDate data = transacao.getData().toLocalDate(); // Extrai a parte de data do LocalDateTime
+
+	        if (!transacoesPorDia.containsKey(data)) {
+	            transacoesPorDia.put(data, new ArrayList<>());
+	        }
+
+	        transacoesPorDia.get(data).add(modelMapper.map(transacao, TransacaoDTO.class));
+	    }
+
+	    return transacoesPorDia;
+	}
+	
+	public Double SomaTransacao(Integer usuarioId, TipoTransacao tipo, LocalDateTime dataini, LocalDateTime datafim) {
+		List<Transacao> transacoes = trRepository.findAllByUsuarioIdAndTipoAndDataBetweenOrderByDataDesc(usuarioId, tipo, dataini, datafim  );
+		Double somaValores = transacoes.stream().mapToDouble(Transacao::getValor).sum();
+		return somaValores;
 	}
 
 }

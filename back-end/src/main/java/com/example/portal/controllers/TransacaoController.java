@@ -24,6 +24,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.example.portal.models.Transacao;
 import com.example.portal.models.dtos.TransacaoDTO;
+import com.example.portal.models.enums.TipoTransacao;
 import com.example.portal.repositories.TransacaoRepository;
 import com.example.portal.services.TransacaoService;
 
@@ -106,17 +107,43 @@ public class TransacaoController {
 	@GetMapping
 	public ResponseEntity<?> findAll(@RequestParam(required = true) Integer usuid,
 			@RequestParam(required = false) LocalDate dataini,
-			@RequestParam(required = false) LocalDate datafim) {
+			@RequestParam(required = false) LocalDate datafim,
+			@RequestParam(required = false) TipoTransacao tipo) {
 		
 		if (dataini != null && datafim != null) {
 			 LocalDateTime datainiTime = dataini.atTime(00, 00);
 			 LocalDateTime datafimTime = datafim.atTime(00, 00);
-			Map<LocalDate, List<TransacaoDTO>> transacoesPorDia = service.BuscarTransacaoUsuPorDiaFiltrada(usuid, datainiTime, datafimTime);
+			 
+			 if(tipo == null) {
+				 Map<LocalDate, List<TransacaoDTO>> transacoesPorDia = service.BuscarTransacaoUsuPorDiaFiltrada(usuid, datainiTime, datafimTime);
+				return ResponseEntity.ok(transacoesPorDia);
+			 }
+			Map<LocalDate, List<TransacaoDTO>> transacoesPorDia = service.BuscarTransacaoUsuPorDiaFiltrada(usuid, tipo, datainiTime, datafimTime);
 			return ResponseEntity.ok(transacoesPorDia);
 		}
 		
-		Map<LocalDate, List<TransacaoDTO>> transacoesPorDia = service.BuscarTransacaoUsuPorDia(usuid);
+		if(tipo == null) {
+			Map<LocalDate, List<TransacaoDTO>> transacoesPorDia = service.BuscarTransacaoUsuPorDia(usuid);
+			return ResponseEntity.ok(transacoesPorDia);
+		 }
+		
+		Map<LocalDate, List<TransacaoDTO>> transacoesPorDia = service.BuscarTransacaoUsuPorDia(usuid, tipo);
 		return ResponseEntity.ok(transacoesPorDia);
+		
+	}
+	
+	@GetMapping("/soma")
+	public ResponseEntity<?> Soma(@RequestParam(required = true) Integer usuid,
+			@RequestParam(required = true) LocalDate dataini,
+			@RequestParam(required = true) LocalDate datafim,
+			@RequestParam(required = true) TipoTransacao tipo) {
+		
+		LocalDateTime datainiTime = dataini.atTime(00, 00);
+		LocalDateTime datafimTime = datafim.atTime(00, 00);
+		
+		Double soma = service.SomaTransacao(usuid, tipo, datainiTime, datafimTime);
+		return ResponseEntity.ok(soma);
+		
 	}
 
 	@GetMapping("/{id}")

@@ -2,23 +2,20 @@ import { configureStore } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE, persistReducer, persistStore } from 'redux-persist';
 import authSlice from './AuthSlice';
-import themeSlice from './ThemeSlice';
-import TransacaoSlice from './TransacaoSlice';
+import transacaoSlice from './TransacaoSlice';
 
 const persistConfig = {
     key: 'root',
     storage: AsyncStorage,
-    blacklist: ['transacao']
+    blacklist: ['transacao'],
 };
 
 const persistedAuthReducer = persistReducer(persistConfig, authSlice);
-const persistedThemeReducer = persistReducer(persistConfig, themeSlice);
 
 const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
-    theme: persistedThemeReducer,
-    transacao: TransacaoSlice,
+    transacao: transacaoSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

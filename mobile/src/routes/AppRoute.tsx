@@ -2,11 +2,16 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { BottomNavigation } from 'react-native-paper';
-import Usuario from '../pages/Usuario';
+
+import TopTabs from './TopTabs';
+import UsuarioPage from '../pages/UsuarioPage';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const {Navigator, Screen} = createNativeStackNavigator();
 
 const AppRoute = () => {
+
+  const insets = useSafeAreaInsets();
 
   const [index, setIndex] = useState(0);
 
@@ -16,12 +21,19 @@ const AppRoute = () => {
   ]);
 
   const renderScene = BottomNavigation.SceneMap({
-    transacoes: HistoricoCamp,
-    usuario: Usuario,
+    transacoes: TopTabs,
+    usuario: UsuarioPage,
   });
 
   return (
-      <BottomNavigation
+      <BottomNavigation 
+          barStyle={{
+            backgroundColor:'#ffffff', 
+            marginBottom:insets.bottom , 
+            height:40,
+            justifyContent:'center', 
+            alignItems:'center'
+          }}
           navigationState={{ index, routes }}
           onIndexChange={setIndex}
           renderScene={renderScene}
