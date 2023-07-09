@@ -1,7 +1,6 @@
 import { TipoTransacao } from "./enums";
 
 export interface Transacao {
-
     id?:number,
     descricao: string,
     valor: number,
@@ -18,5 +17,6 @@ export interface TransacaoUpdate {
 }
 
 export interface TransacaoDia {
-    [data: string]: Transacao[];
+    data: string;
+    transacao: Transacao[];
 }

@@ -13,7 +13,6 @@ import { findSaldoByUsuId, loginUsu, somaSaldoMes } from "../../services/api";
 import { useAppDispatch } from "../../@types/reduxHooks";
 import { signIn } from "../../redux/AuthSlice";
 import { Usuario } from "../../@types/usuario";
-import { setEntrada, setSaida, setSaldo } from "../../redux/TransacaoSlice";
 import { TipoTransacao } from "../../@types/enums";
 
 const Login = () => {
@@ -25,28 +24,16 @@ const Login = () => {
   const dispatch = useAppDispatch();
 
   const handleLogin = () => {
+
     loginUsu({email: usuEmail, senha:usuSenha}).then(response => {
       const usu:Usuario = response.data as Usuario;
+      console.log(response);
       dispatch(signIn({ usuario: usu }));
-      dispatch(setSaldo(usu.saldo));
-
-      somaSaldoMes(usu.id!, TipoTransacao.ENTRADA).then(response => {
-        console.log(response.data)
-        dispatch(setEntrada(response.data as number));
-      }).catch(response => {
-        console.log(response)
-      })
-      somaSaldoMes(usu.id!, TipoTransacao.SAIDA).then(response => {
-        console.log(response.data)
-        dispatch(setSaida(response.data as number));
-      }).catch(response => {
-        console.log(response)
-      })
     }).catch(response => {
       console.log(response)
     })
-    
   }
+    
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -116,3 +103,4 @@ const Login = () => {
 };
 
 export default Login;
+

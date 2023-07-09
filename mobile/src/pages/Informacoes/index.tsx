@@ -2,12 +2,9 @@ import React, { useState, useEffect } from "react";
 import { View, Image, Text } from "react-native";
 
 import { styles } from "./styles";
-import { FAB } from "react-native-paper";
 import { useAppDispatch, useAppSelector } from "../../@types/reduxHooks";
-import { setEntrada, setSaida, setSaldo, setTransacoes } from "../../redux/TransacaoSlice";
-import { findAll, somaSaldoMes } from "../../services/api";
-import { TipoTransacao } from "../../@types/enums";
-import { TransacaoDia } from "../../@types/transacao";
+import { fetchInfo } from "../../redux/TransacaoSlice";
+import CarregamentoIni from "../../components/CarregamentoIni";
 
 const Informacoes = () => {
 
@@ -15,24 +12,17 @@ const Informacoes = () => {
   const saldo = useAppSelector(state => state.transacao.saldo);
   const entrada = useAppSelector(state => state.transacao.entrada);
   const saida = useAppSelector(state => state.transacao.saida);
-  const transacoes = useAppSelector(state => state.transacao.transacoes);
+  const loading = useAppSelector(state => state.transacao.loading);
 
   const dispatch = useAppDispatch();
 
-  const [state, setState] = useState({ open: false });
-
   useEffect(() => {
-      console.log(saldo)
-      // somaSaldoMes(usu?.id!, TipoTransacao.SAIDA).then(response => {
-      //   console.log(response.data)
-      //   dispatch(setSaida({ saida: response.data }));
-      // })
-      // console.log(saldo, '',entrada, '',saida)
-  }, []);
+    dispatch(fetchInfo(usu?.id? usu?.id!:0));
+  }, [])
 
-  const onStateChange = ({ open }:any) => setState({ open });
-
-  const { open } = state;
+  if(loading){
+    return <CarregamentoIni/>
+  }
 
   return (
     <View style={styles.container}>
@@ -64,27 +54,6 @@ const Informacoes = () => {
           </View>
         </View>
       </View>
-        <FAB.Group
-          open={open}
-          visible
-          fabStyle={styles.fab}
-          icon={open ? 'plus' : 'cash-register'}
-          actions={[
-            {
-              icon: 'cash-plus',
-              label: 'Entrada',
-              color: '#7ED957',
-              onPress: () => console.log('Pressed star'),
-            },
-            {
-              icon: 'cash-minus',
-              label: 'Saída',
-              color: '#FF3131',
-              onPress: () => console.log('Pressed email'),
-            },
-          ]}
-          onStateChange={onStateChange}
-        />
     </View>
   );
 };

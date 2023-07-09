@@ -1,18 +1,28 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, Image } from 'react-native';
 
 import { styles } from './styles';
-import { Button } from 'react-native-paper';
-import { useAppDispatch } from '../../@types/reduxHooks';
+import { Avatar, Button, Text } from 'react-native-paper';
+import { useAppDispatch, useAppSelector } from '../../@types/reduxHooks';
 import { signOut } from '../../redux/AuthSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const UsuarioPage = () => {
 
   const dispatch = useAppDispatch();
+
+  const usu = useAppSelector(state => state.auth.usuario);
+  
     return (
       <SafeAreaView style={styles.container}>
-               <Button
+        <View style={styles.caixa}>
+          <Avatar.Text size={106} label={usu!.nome.charAt(0)} style={styles.avatar} />
+          <Text variant='titleLarge' >{`Nome: ${usu!.nome}`}</Text>
+          <Text variant='titleMedium'>{`Nome: ${usu!.email}`}</Text>
+        </View>
+
+        <Button
+          style={styles.button}
           buttonColor={'#FFFFFF'}
           mode="contained"
           onPress={() => dispatch(signOut())}

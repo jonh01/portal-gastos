@@ -34,7 +34,7 @@ public class UsuarioController {
 	@PostMapping
 	public ResponseEntity<?> create(@RequestBody Usuario usu) {
 		
-		Optional<Usuario> usuExist = repository.findByEmail(usu.getEmail());
+		Optional<Usuario> usuExist = repository.findByEmailIgnoreCase(usu.getEmail());
 		
 		if(usuExist.isPresent()) {
 			return ResponseEntity.badRequest().body("Email já cadastrado!");
@@ -64,7 +64,7 @@ public class UsuarioController {
 	
 	@GetMapping
 	public ResponseEntity<?> findByEmail(@RequestParam String email){
-		Optional<Usuario> usu = repository.findByEmail(email);
+		Optional<Usuario> usu = repository.findByEmailIgnoreCase(email);
 		return usu.isPresent()? ResponseEntity.ok(usu): ResponseEntity.notFound().build();
 	}
 	
@@ -77,7 +77,7 @@ public class UsuarioController {
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@Valid @RequestBody UsuarioDTO usuLogin ){
 		
-		Optional<Usuario> usu = repository.findByEmail(usuLogin.getEmail());
+		Optional<Usuario> usu = repository.findByEmailIgnoreCase(usuLogin.getEmail());
 		
 		if(usu.isPresent()) {
 			
@@ -92,7 +92,7 @@ public class UsuarioController {
 	@PutMapping("/senha")
 	public ResponseEntity<?> updateSenha(@Valid @RequestBody UsuarioDTO usuLogin ){
 		
-		Optional<Usuario> usu = repository.findByEmail(usuLogin.getEmail());
+		Optional<Usuario> usu = repository.findByEmailIgnoreCase(usuLogin.getEmail());
 		
 		if(usu.isPresent()) {
 			usu.get().setSenha(usuLogin.getSenha());

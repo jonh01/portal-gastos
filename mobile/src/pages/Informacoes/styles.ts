@@ -78,11 +78,4 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FF3131'
   },
-  fab: {
-    marginBottom: 30,
-    marginRight: 10,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#FFFFFF',
-  },
 });
