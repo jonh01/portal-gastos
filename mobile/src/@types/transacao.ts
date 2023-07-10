@@ -12,8 +12,8 @@ export interface Transacao {
 export interface TransacaoUpdate {
 
     id:number,
-    descricao?: string,
-    valor?: number,
+    descricao?: string|null,
+    valor?: number|null,
 }
 
 export interface TransacaoDia {

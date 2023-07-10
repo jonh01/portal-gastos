@@ -1,26 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Image, View } from 'react-native';
 
 import { styles } from './styles';
 import { Button, Modal, Portal, Text, TextInput } from 'react-native-paper';
 import { TipoTransacao } from '../../@types/enums';
-import { createTransacao } from '../../services/api';
-import { useAppSelector } from '../../@types/reduxHooks';
+import { AlterTransacao, createTransacao } from '../../services/api';
+import { Transacao } from '../../@types/transacao';
 
 interface props {
   visible: boolean;
   titulo:string
-  tipo: TipoTransacao,
+  transacao?: Transacao,
   onClose: () => void;
   alteracao: () => void;
 }
 
 
-const AddTransacao = ({visible,titulo, tipo, onClose, alteracao}: props) => {
+const AttTransacao = ({visible,titulo, transacao, onClose, alteracao}: props) => {
 
-  const usu = useAppSelector((state) => state.auth.usuario);
-  const [descricao, setDescricao] = useState("");
-  const [valor, setValor] = useState("");
+  const [descricao, setDescricao] = useState('');
+  const [valor, setValor] = useState('');
+
+  useEffect(()=> {
+    setDescricao(transacao?.descricao!);
+    setValor(transacao?.valor.toString()!)
+  }, [visible])
 
   const handleAdd = () => {
     if(descricao == '' || valor == '')
@@ -28,16 +32,13 @@ const AddTransacao = ({visible,titulo, tipo, onClose, alteracao}: props) => {
     else if (isNaN(parseFloat(valor))) {
       alertDefault('Erro de tipo', 'Utilize ponto ao invés de virgula')
     }
-    else{
-      createTransacao({data:(new Date()).toISOString(), descricao:descricao, tipo:tipo, valor:parseFloat(valor), usuarioId:usu!.id!}).then(()=> {
-        setDescricao('');
-        setValor('');
-      }).catch(response => {
-        console.log('error',response);
-        setDescricao('');
-        setValor('');
-    })
-    }
+     else{
+       AlterTransacao({
+        id:transacao?.id!,
+        descricao: descricao!= transacao?.descricao?descricao: null,
+        valor: parseFloat(valor)!= transacao?.valor? parseFloat(valor): null
+      }).catch(response => console.log('error',response))
+     }
   }
 
   const alertDefault = (titulo: string, mensagem: string) =>
@@ -54,11 +55,11 @@ const AddTransacao = ({visible,titulo, tipo, onClose, alteracao}: props) => {
       <Modal
         visible={visible}
         onDismiss={onClose}
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[styles.container, {backgroundColor: transacao?.tipo==TipoTransacao.ENTRADA? '#dbffef': '#FEFE'}]}
     >
         <Text variant='titleLarge'
-          style={{color:tipo==TipoTransacao.ENTRADA? '#3bc500':'#FF3131', fontWeight:'900',paddingBottom:20}}
-        >Adicionar Transação de {tipo==TipoTransacao.ENTRADA? 'Entrada': 'Saída'}</Text>
+          style={{fontWeight:'900',paddingBottom:20}}
+        >{titulo}</Text>
 
         <TextInput
           mode='outlined'
@@ -74,7 +75,7 @@ const AddTransacao = ({visible,titulo, tipo, onClose, alteracao}: props) => {
           label="Valor"
           placeholder="Valor"
           keyboardType='number-pad'
-          value={valor.toString()}
+          value={valor}
           onChangeText={text => setValor(text)}
           contentStyle={styles.textinput}
         />
@@ -88,11 +89,11 @@ const AddTransacao = ({visible,titulo, tipo, onClose, alteracao}: props) => {
             alteracao();
           }}
         >
-          Adicionar
+          Alterar
         </Button>
       </Modal>
     </Portal>
   );
   };
   
-  export default AddTransacao;
+  export default AttTransacao;

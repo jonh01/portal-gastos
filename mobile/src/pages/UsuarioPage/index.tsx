@@ -18,7 +18,7 @@ const UsuarioPage = () => {
         <View style={styles.caixa}>
           <Avatar.Text size={106} label={usu!.nome.charAt(0)} style={styles.avatar} />
           <Text variant='titleLarge' >{`Nome: ${usu!.nome}`}</Text>
-          <Text variant='titleMedium'>{`Nome: ${usu!.email}`}</Text>
+          <Text variant='titleMedium'>{`Email: ${usu!.email}`}</Text>
         </View>
 
         <Button

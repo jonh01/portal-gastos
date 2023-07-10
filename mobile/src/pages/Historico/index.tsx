@@ -12,6 +12,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import ListEmpty from "../../components/ListEmpty";
 import AddTransacao from "../../components/AddTransacao";
 import { TipoTransacao } from "../../@types/enums";
+import AttTransacao from "../../components/AttTransacao";
+import { fetchUsuario } from "../../redux/AuthSlice";
 
 const Historico = () => {
   const usu = useAppSelector((state) => state.auth.usuario);
@@ -23,13 +25,12 @@ const Historico = () => {
   const onStateChange = ({ open }:any) => setState({ open });
   const [alteracao, setAlteracao] = useState(true);
 
-  const [visible, setVisible] = useState(false);
+  const [visibleAdd, setVisibleAdd] = useState(false);
 
-  const showModal = () => setVisible(!visible);
+  const showModalAdd = () => setVisibleAdd(!visibleAdd);
 
   const alterou = () => {
     setAlteracao(true);
-    dispatch(fetchInfo(usu?.id? usu?.id!:0));
   };
 
   const { open } = state;
@@ -37,12 +38,13 @@ const Historico = () => {
   useEffect(() => {
     findAll(usu?.id? usu?.id!:0)
       .then((response) => {
-        console.log("response", response.data);
         const lista: TransacaoDia[] = Object.entries(response.data).map(([data, transacoes]) => ({
           data,
           transacao: transacoes as Transacao[]
         }));
         dispatch(setTransacao(lista));
+        dispatch(fetchInfo(usu?.id? usu?.id!:0));
+        dispatch(fetchUsuario(usu?.email? usu.email:''));
         setAlteracao(false);
       })
       .catch((response) => {
@@ -80,23 +82,23 @@ const Historico = () => {
               icon: 'cash-plus',
               label: 'Entrada',
               color: '#7ED957',
-              onPress: () => {setTipo(TipoTransacao.ENTRADA); showModal()},
+              onPress: () => {setTipo(TipoTransacao.ENTRADA); showModalAdd()},
             },
             {
               icon: 'cash-minus',
               label: 'Saída',
               color: '#FF3131',
-              onPress: () => {setTipo(TipoTransacao.SAIDA); showModal()},
+              onPress: () => {setTipo(TipoTransacao.SAIDA); showModalAdd()},
             },
           ]}
           onStateChange={onStateChange}
         />
         <AddTransacao
           alteracao={() => {alterou()}}
-          visible={visible}
+          visible={visibleAdd}
           titulo={tipo == TipoTransacao.ENTRADA? 'Transação de Entrada': 'Transação de Saída'}
           tipo={tipo}
-        onClose={() => showModal()}
+        onClose={() => showModalAdd()}
       />
     </View>
   );

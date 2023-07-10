@@ -78,4 +78,10 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FF3131'
   },
+  textAtt: {
+    alignSelf:'center',
+    color: 'rgba(255,255,255,.6)',
+    fontSize: 16,
+    marginTop:140,
+  },
 });

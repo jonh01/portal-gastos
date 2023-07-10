@@ -7,30 +7,37 @@ import {
 
 import { styles } from "./styles";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Text, TextInput } from "react-native-paper";
+import { Button, Snackbar, Text, TextInput } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import { findSaldoByUsuId, loginUsu, somaSaldoMes } from "../../services/api";
+import { loginUsu } from "../../services/api";
 import { useAppDispatch } from "../../@types/reduxHooks";
 import { signIn } from "../../redux/AuthSlice";
 import { Usuario } from "../../@types/usuario";
-import { TipoTransacao } from "../../@types/enums";
 
 const Login = () => {
 
   const [usuEmail, SetUsuEmail] = useState("");
   const [usuSenha, SetUsuSenha] = useState("");
 
+  const [snakBar, setSnakBar] = useState(false);
+  const [mensagem, setMensagem] = useState('');
+
   const navigation = useNavigation()
   const dispatch = useAppDispatch();
+
+  const onToggleSnackBar = () => setSnakBar(!snakBar);
+  const onDismissSnackBar = () => setSnakBar(false);
 
   const handleLogin = () => {
 
     loginUsu({email: usuEmail, senha:usuSenha}).then(response => {
       const usu:Usuario = response.data as Usuario;
-      console.log(response);
+      console.log(response.data);
       dispatch(signIn({ usuario: usu }));
     }).catch(response => {
       console.log(response)
+      setMensagem('Login ou senha inválido!');
+      onToggleSnackBar();
     })
   }
     
@@ -40,6 +47,7 @@ const Login = () => {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         keyboardDismissMode="none"
+        keyboardShouldPersistTaps="always"
       >
         <View style={styles.header}>
           <Image
@@ -56,6 +64,7 @@ const Login = () => {
             outlineStyle={{borderColor:'#FFFFFF'}}
             mode="outlined"
             placeholder="example@email.com"
+            keyboardType="email-address"
             onChangeText={SetUsuEmail}
             value={usuEmail}
           />
@@ -98,6 +107,19 @@ const Login = () => {
             <Text>Registre-se</Text>
          </Button>
       </ScrollView>
+      <Snackbar
+          visible={snakBar}
+          onDismiss={onDismissSnackBar}
+          duration={2000}
+          action={{
+            label: "Fechar",
+            onPress: () => {
+              // Do something
+            },
+          }}
+        >
+          {mensagem}
+        </Snackbar>
     </SafeAreaView>
   );
 };

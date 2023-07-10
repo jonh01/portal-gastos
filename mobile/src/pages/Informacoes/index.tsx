@@ -7,6 +7,8 @@ import { fetchInfo } from "../../redux/TransacaoSlice";
 import CarregamentoIni from "../../components/CarregamentoIni";
 import { useIsFocused } from "@react-navigation/native";
 import { TouchableRipple } from "react-native-paper";
+import { fetchUsuario } from "../../redux/AuthSlice";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Informacoes = () => {
 
@@ -19,6 +21,7 @@ const Informacoes = () => {
 
   useEffect(() => {
     dispatch(fetchInfo(usu?.id? usu?.id!:0));
+    dispatch(fetchUsuario(usu?.email? usu.email:''));
   }, [])
 
   return (
@@ -35,7 +38,7 @@ const Informacoes = () => {
 
         <View style={styles.caixaSaldo}>
           <Text style={styles.texto1}>Saldo da conta</Text>
-          <Text style={styles.texto2}>{`R$ ${saldo}`}</Text>
+          <Text style={styles.texto2}>{`R$ ${saldo.toFixed(2)}`}</Text>
           
         </View>
 
@@ -52,6 +55,7 @@ const Informacoes = () => {
             </View>
           </View>
         </View>
+        <Text style={styles.textAtt }>Pressione para atualizar...</Text>
       </View>
     </TouchableRipple>
   );

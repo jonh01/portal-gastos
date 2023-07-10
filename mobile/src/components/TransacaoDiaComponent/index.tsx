@@ -5,6 +5,8 @@ import { styles } from "./styles";
 import { Transacao, TransacaoDia } from "../../@types/transacao";
 import { Text, TouchableRipple } from "react-native-paper";
 import { deleteTransacao } from "../../services/api";
+import AttTransacao from "../AttTransacao";
+import { TipoTransacao } from "../../@types/enums";
 
 interface props {
   transacaoDia: TransacaoDia;
@@ -12,8 +14,19 @@ interface props {
 }
 const TransacaoDiaComponent = ({ transacaoDia,alteracao }: props) => {
 
+  const [visibleAtt, setVisibleAtt] = useState(false);
+  const [transacaoState, setTransacaoState] = useState<Transacao>();
+
+
+  const showModalAtt = () => setVisibleAtt(!visibleAtt);
+
   const handleDelete = (id:number) => {
     deleteTransacao(id).catch(response => console.log(response))
+  }
+
+  const handleAlterar = (transacaoAtt: Transacao) => {
+    setTransacaoState(transacaoAtt);
+    showModalAtt();
   }
 
   const alert = (id:number) =>
@@ -32,7 +45,7 @@ const TransacaoDiaComponent = ({ transacaoDia,alteracao }: props) => {
       {transacaoDia.transacao.map((transacao) => (
         <TouchableRipple
         key={transacao.id}
-        onPress={() => console.log('press')}
+        onPress={() => {handleAlterar(transacao)}}
         onLongPress={() => {alert(transacao.id!)}}
         rippleColor="rgba(0, 0, 0, .32)"
         style={[
@@ -72,6 +85,13 @@ const TransacaoDiaComponent = ({ transacaoDia,alteracao }: props) => {
           </View>
         </TouchableRipple>
       ))}
+      <AttTransacao
+          alteracao={() => {alteracao()}}
+          visible={visibleAtt}
+          titulo={'Alterar Transação de '+(transacaoState?.tipo==TipoTransacao.ENTRADA? 'Entrada':'Saída')}
+          transacao={transacaoState}
+        onClose={() => showModalAtt()}
+      />
     </View>
   );
 };
