@@ -12,20 +12,18 @@ interface props {
 }
 const TransacaoDiaComponent = ({ transacaoDia,alteracao }: props) => {
 
-  const [id, setId] = useState(0);
-
-  const handleDelete = () => {
+  const handleDelete = (id:number) => {
     deleteTransacao(id).catch(response => console.log(response))
   }
 
-  const alert = () =>
+  const alert = (id:number) =>
   Alert.alert('Transação', 'Deletar transação?', [
     {
       text: 'Cancel',
       onPress: () => console.log('Cancel Pressed'),
       style: 'cancel',
     },
-    {text: 'OK', onPress: () => {handleDelete(); alteracao()}},
+    {text: 'OK', onPress: () => {handleDelete(id); alteracao()}},
   ]);
 
   return (
@@ -35,7 +33,7 @@ const TransacaoDiaComponent = ({ transacaoDia,alteracao }: props) => {
         <TouchableRipple
         key={transacao.id}
         onPress={() => console.log('press')}
-        onLongPress={() => {alert(); setId(transacao.id!)}}
+        onLongPress={() => {alert(transacao.id!)}}
         rippleColor="rgba(0, 0, 0, .32)"
         style={[
           styles.caixaTransacao,

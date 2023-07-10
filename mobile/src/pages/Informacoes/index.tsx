@@ -5,6 +5,8 @@ import { styles } from "./styles";
 import { useAppDispatch, useAppSelector } from "../../@types/reduxHooks";
 import { fetchInfo } from "../../redux/TransacaoSlice";
 import CarregamentoIni from "../../components/CarregamentoIni";
+import { useIsFocused } from "@react-navigation/native";
+import { TouchableRipple } from "react-native-paper";
 
 const Informacoes = () => {
 
@@ -12,7 +14,6 @@ const Informacoes = () => {
   const saldo = useAppSelector(state => state.transacao.saldo);
   const entrada = useAppSelector(state => state.transacao.entrada);
   const saida = useAppSelector(state => state.transacao.saida);
-  const loading = useAppSelector(state => state.transacao.loading);
 
   const dispatch = useAppDispatch();
 
@@ -20,12 +21,10 @@ const Informacoes = () => {
     dispatch(fetchInfo(usu?.id? usu?.id!:0));
   }, [])
 
-  if(loading){
-    return <CarregamentoIni/>
-  }
-
   return (
-    <View style={styles.container}>
+    <TouchableRipple 
+    onPress={() => {dispatch(fetchInfo(usu?.id? usu?.id!:0));}}
+    style={styles.container}>
       <View>
         <View style={styles.header}>
           <Image
@@ -54,7 +53,7 @@ const Informacoes = () => {
           </View>
         </View>
       </View>
-    </View>
+    </TouchableRipple>
   );
 };
 
