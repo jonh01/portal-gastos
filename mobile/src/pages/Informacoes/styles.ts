@@ -22,9 +22,9 @@ export const styles = StyleSheet.create({
   caixaSaldo: {
     backgroundColor: "white",
     borderRadius: 5,
-    width: 300,
+    width: 360,
     height: 150,
-    padding: 10,
+    paddingVertical: 10,
     fontWeight: "bold",
     color: "white",
     alignSelf: 'center',
@@ -32,7 +32,7 @@ export const styles = StyleSheet.create({
   },
   texto1: {
     fontWeight: "bold",
-    fontSize: 20,
+    fontSize: 16,
     alignSelf: 'center',
   },
   texto2: {
@@ -43,7 +43,7 @@ export const styles = StyleSheet.create({
   },
 
   caixaRelatorio: {
-    marginTop: 10,
+    marginTop: 20,
     backgroundColor: "white",
     borderRadius: 5,
     width: 300,

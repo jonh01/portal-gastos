@@ -21,18 +21,13 @@ export const formatarSaldoNumber = (val: string) => {
 export const formatarSaldoView = (saldo: number) => {
   const saldoString = saldo.toFixed(2).toString();
   const partes = saldoString.split(".");
-  
   if (partes.length === 2) {
-    const [real, centavo] = partes;
-    const realFracionado = real.split("").reverse().reduce((acc, digit, index) => {
-      if (index === 2) {
-        return '.' + digit + acc;
-      }
-      return digit + acc;
-    }, "");
-    
-    return `R$ ${realFracionado},${centavo}`;
+    const real = partes[0];
+    const centavo = partes[1];
+    const numero = Number(real);
+    const sequenciaFormatada = numero.toLocaleString();
+    const saldoFormatado = 'R$ ' + sequenciaFormatada + "," + centavo;
+    return saldoFormatado;
   }
-  
   return saldoString;
 };
