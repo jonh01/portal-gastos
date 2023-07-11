@@ -7,6 +7,7 @@ import { Text, TouchableRipple } from "react-native-paper";
 import { deleteTransacao } from "../../services/api";
 import AttTransacao from "../AttTransacao";
 import { TipoTransacao } from "../../@types/enums";
+import { formatarData, formatarSaldoView } from "../../utils/formatador";
 
 interface props {
   transacaoDia: TransacaoDia;
@@ -41,7 +42,7 @@ const TransacaoDiaComponent = ({ transacaoDia,alteracao }: props) => {
 
   return (
     <View style={styles.caixaRelatorio}>
-      <Text style={[styles.data, styles.texto]}>{transacaoDia.data}</Text>
+      <Text style={[styles.data, styles.texto]}>{formatarData(transacaoDia.data)}</Text>
       {transacaoDia.transacao.map((transacao) => (
         <TouchableRipple
         key={transacao.id}
@@ -70,7 +71,7 @@ const TransacaoDiaComponent = ({ transacaoDia,alteracao }: props) => {
                     : styles.textoRelRed
                 }
                 variant="titleMedium"
-              >{`Valor R$: ${transacao.valor}`}</Text>
+              >{`Valor: ${formatarSaldoView(transacao.valor)}`}</Text>
               <Text
                 style={
                   transacao.tipo == "ENTRADA"

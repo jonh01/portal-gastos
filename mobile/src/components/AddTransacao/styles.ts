@@ -13,6 +13,12 @@ export const styles = StyleSheet.create({
     width:200,
     maxHeight:100,
   },
+  textinputMoeda: {
+    width:200,
+    maxHeight:100,
+    justifyContent:'center',
+    alignSelf:'center'
+  },
   button: {
     marginTop:36,
   },

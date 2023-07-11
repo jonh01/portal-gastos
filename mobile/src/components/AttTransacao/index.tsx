@@ -6,6 +6,8 @@ import { Button, Modal, Portal, Text, TextInput } from 'react-native-paper';
 import { TipoTransacao } from '../../@types/enums';
 import { AlterTransacao, createTransacao } from '../../services/api';
 import { Transacao } from '../../@types/transacao';
+import { MaskedTextInput } from 'react-native-mask-text';
+import { formatarSaldoNumber } from '../../utils/formatador';
 
 interface props {
   visible: boolean;
@@ -20,23 +22,23 @@ const AttTransacao = ({visible,titulo, transacao, onClose, alteracao}: props) =>
 
   const [descricao, setDescricao] = useState('');
   const [valor, setValor] = useState('');
-
   useEffect(()=> {
     setDescricao(transacao?.descricao!);
-    setValor(transacao?.valor.toString()!)
   }, [visible])
 
   const handleAdd = () => {
     if(descricao == '' || valor == '')
       alertDefault('Campos Vazios', 'Preencha todos os campos!')
-    else if (isNaN(parseFloat(valor))) {
-      alertDefault('Erro de tipo', 'Utilize ponto ao invés de virgula')
+    else if (isNaN(formatarSaldoNumber(valor))) {
+      alertDefault('Erro de tipo', 'Utilize ponto ao invés de virgula');
+      setDescricao("");
+      setValor("");
     }
      else{
        AlterTransacao({
         id:transacao?.id!,
         descricao: descricao!= transacao?.descricao?descricao: null,
-        valor: parseFloat(valor)!= transacao?.valor? parseFloat(valor): null
+        valor: formatarSaldoNumber(valor)!= transacao?.valor? formatarSaldoNumber(valor): null
       }).catch(response => console.log('error',response))
      }
   }
@@ -70,13 +72,29 @@ const AttTransacao = ({visible,titulo, transacao, onClose, alteracao}: props) =>
           onChangeText={text => setDescricao(text)}
           contentStyle={styles.textinput}
         />
-        <TextInput
-          mode='outlined'
-          label="Valor"
-          placeholder="Valor"
-          keyboardType='number-pad'
-          value={valor}
-          onChangeText={text => setValor(text)}
+                <TextInput
+          mode="outlined"
+          keyboardType="numeric"
+          render={(props) => (
+            <MaskedTextInput
+              {...props}
+              type="currency"
+              options={{
+                prefix: "R$",
+                decimalSeparator: ",",
+                groupSeparator: ".",
+                precision: 2,
+              }}
+              value={transacao? (
+                transacao.valor.toString().includes('.')?
+                ((transacao.valor.toFixed(2)).toString().replace(/\./g, "")) :
+                transacao.valor.toString()+'00'
+                ):''}
+              onChangeText={(value) => {
+                setValor(value);
+              }}
+            />
+          )}
           contentStyle={styles.textinput}
         />
 
